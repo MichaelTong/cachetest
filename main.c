@@ -13,7 +13,7 @@ typedef struct BigMEMBlock {
 
 int numblocks = 1024;
 int numworkers = 16;
-int runtime = 30;
+int runtime = 15;
 
 
 size_t MEMBLOCKSIZE = sizeof(BigMEMBlock);
@@ -27,12 +27,13 @@ int background = 0;
 
 long setmem() {
   int idx = rand() % numblocks;
+  unsigned char newvalue = rand() % 256;
   struct timespec begin, end;
   long timediff;
   BigMEMBlock *target = mempool+idx;
 
   clock_gettime(CLOCK_MONOTONIC, &begin);
-  memset(target, 0, sizeof(MEMBLOCKSIZE));
+  memset(target, newvalue, sizeof(MEMBLOCKSIZE));
   clock_gettime(CLOCK_MONOTONIC, &end);
   timediff = (end.tv_sec - begin.tv_sec) * 1000000000 + (end.tv_nsec - begin.tv_nsec);
   return timediff;
@@ -71,7 +72,8 @@ void *dowork() {
 }
 
 void *timerend() {
-  for (int i = 0; i < runtime; i++) {
+  int i;
+  for (i = 0; background || i < runtime; i++) {
     if (!background) {
       printf("Progress: %d/%d               \r", i, runtime);
     }
@@ -84,6 +86,7 @@ void *timerend() {
 
 
 int main(int argc, char** argv) {
+  int i;
   mempool = (BigMEMBlock *)calloc(numblocks, sizeof(BigMEMBlock));
   tid = malloc(numworkers * sizeof(pthread_t));
 
@@ -97,13 +100,13 @@ int main(int argc, char** argv) {
   }
 
   pthread_mutex_init(&filelock, NULL);
-  for(int i = 0; i < numworkers; i ++) {
+  for(i = 0; i < numworkers; i ++) {
     pthread_create(&tid[i], NULL, dowork, NULL);
   }
   pthread_create(&timer_td, NULL, timerend, NULL);
 
   pthread_join(timer_td, NULL);
-  for (int i = 0; i < numworkers; i++) {
+  for (i = 0; i < numworkers; i++) {
     pthread_join(tid[i], NULL);
   }
   pthread_mutex_destroy(&filelock);
