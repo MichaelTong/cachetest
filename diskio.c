@@ -28,6 +28,7 @@ int64_t DISK_SIZE_IN_SECTS = 0;
 pthread_t *tid;
 // ANOTHER GLOBAL VARIABLES
 int fd;
+pthread_mutex_t lock;
 
 int64_t get_disksz_in_sects(int devfd)
 {
@@ -44,10 +45,11 @@ void *performIO(){
     offset = rand()%(DISK_SIZE_IN_SECTS - 16);
     pread(fd, buff, 4096, offset*512);
   }
+  free(buff);
   return NULL;
 }
 
-void operateWorkers(){
+void oper\ateWorkers(){
   int x;
   tid = malloc(numworkers * sizeof(pthread_t));
   if(tid == NULL){
@@ -91,8 +93,6 @@ int main(int argc, char *argv[]) {
   DISK_SIZE_IN_SECTS = get_disksz_in_sects(fd);
 
   operateWorkers();
-
-  free(buff);
 
   return 0;
 }
