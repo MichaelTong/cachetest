@@ -8,11 +8,11 @@
 
 
 typedef struct BigMEMBlock {
-  unsigned char onebyte[1024*1024];
+  unsigned char onebyte[128];
 } BigMEMBlock;
 
-int numblocks = 1024*1024*1024/1024/1024 ;
-int numworkers = 2;
+int numblocks = 1024*1024*1024/128 ;
+int numworkers = 1;
 int runtime = 15;
 int prepare = 5;
 
@@ -35,7 +35,7 @@ long setmem() {
   BigMEMBlock tmp;
 
   clock_gettime(CLOCK_MONOTONIC, &begin);
-  memcpy(&tmp, source, sizeof(MEMBLOCKSIZE)); 
+  memcpy(&tmp, source, sizeof(MEMBLOCKSIZE));
   //memset(target, newvalue, sizeof(MEMBLOCKSIZE));
   clock_gettime(CLOCK_MONOTONIC, &end);
   timediff = (end.tv_sec - begin.tv_sec) * 1000000000 + (end.tv_nsec - begin.tv_nsec);
@@ -98,7 +98,11 @@ void *timerend() {
 
 int main(int argc, char** argv) {
   int i;
-  mempool = (BigMEMBlock *)calloc(numblocks, sizeof(BigMEMBlock));
+  srand((unsigned) time(NULL));
+  mempool = (BigMEMBlock *)malloc(numblocks*sizeof(BigMEMBlock));
+  for (i = 0; i < numblocks; i ++) {
+    memset(&mempool[i], rand()%256, sizeof(BigMEMBlock));
+  }
   tid = malloc(numworkers * sizeof(pthread_t));
 
   if (argc > 1) {
