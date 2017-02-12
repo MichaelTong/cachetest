@@ -48,6 +48,7 @@ void *performIO(){
 }
 
 void operateWorkers(){
+  int x;
   tid = malloc(numworkers * sizeof(pthread_t));
   if(tid == NULL){
     fprintf(stderr,"Error malloc thread!\n");
@@ -88,11 +89,6 @@ int main(int argc, char *argv[]) {
   }
 
   DISK_SIZE_IN_SECTS = get_disksz_in_sects(fd);
-
-  if (posix_memalign(&buff,MEM_ALIGN,LARGEST_REQUEST_SIZE * block_size)){
-    fprintf(stderr,"memory allocation failed\n");
-    exit(1);
-  }
 
   operateWorkers();
 
