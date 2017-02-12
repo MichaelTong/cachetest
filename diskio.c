@@ -49,7 +49,7 @@ void *performIO(){
   return NULL;
 }
 
-void oper\ateWorkers(){
+void operateWorkers(){
   int x;
   tid = malloc(numworkers * sizeof(pthread_t));
   if(tid == NULL){
