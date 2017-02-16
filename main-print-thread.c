@@ -15,7 +15,7 @@ typedef struct BigMEMBlock {
 
 int numblocks = 1024*1024*1024/128 ;
 int numworkers = 1;
-int runtime = 15;
+int runtime = 600;
 int prepare = 5;
 
 size_t MEMBLOCKSIZE = sizeof(BigMEMBlock);
@@ -59,7 +59,7 @@ void flushlog(long *timerecords, int size) {
 void *dowork() {
   long timerecords[10000], timediff;
   int timeidx = 0;
-  printf("Pid: %d\n", syscall(SYS_gettid));
+  printf("Child Pid: %d\n", syscall(SYS_gettid));
   while(!shouldend) {
     timediff = setmem();
     if (record && !background && timeidx < 10000) {
@@ -107,7 +107,7 @@ int main(int argc, char** argv) {
     memset(&mempool[i], rand()%256, sizeof(BigMEMBlock));
   }
   tid = malloc(numworkers * sizeof(pthread_t));
-  printf("Pid: %d\n", syscall(SYS_gettid));
+  printf("Main Pid: %d\n", syscall(SYS_gettid));
 
   if (argc > 1) {
     background = 1;
