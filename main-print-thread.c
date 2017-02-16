@@ -5,6 +5,8 @@
 #include <string.h>
 #include <time.h>
 #include <unistd.h>
+#include <sys/syscall.h>
+#include <sys/types.h>
 
 
 typedef struct BigMEMBlock {
@@ -57,8 +59,7 @@ void flushlog(long *timerecords, int size) {
 void *dowork() {
   long timerecords[10000], timediff;
   int timeidx = 0;
-  printf("Threadid: %d\n", pthread_self());
-  printf("Pid: %d\n", getpid());
+  printf("Pid: %d\n", syscall(SYS_gettid));
   while(!shouldend) {
     timediff = setmem();
     if (record && !background && timeidx < 10000) {
@@ -106,8 +107,7 @@ int main(int argc, char** argv) {
     memset(&mempool[i], rand()%256, sizeof(BigMEMBlock));
   }
   tid = malloc(numworkers * sizeof(pthread_t));
-  printf("Threadid: %d\n", pthread_self());
-  printf("Pid: %d\n", getpid());
+  printf("Pid: %d\n", syscall(SYS_gettid));
 
   if (argc > 1) {
     background = 1;
