@@ -61,7 +61,7 @@ void *dowork() {
   int timeidx = 0;
   printf("Child Pid: %ld\n", syscall(SYS_gettid));
   while(!shouldend) {
-    //    timediff = setmem();
+    timediff = readmmap();
     if (record && !background && timeidx < 10000) {
       timerecords[timeidx] = timediff;
       timeidx ++;
@@ -104,6 +104,7 @@ int main(int argc, char** argv) {
   int filenum = 0;
   char filename[100];
   unsigned long long length;
+  BigMEMBlock tmp;
   srand((unsigned) time(NULL));
 
   tid = malloc(numworkers * sizeof(pthread_t));
@@ -125,6 +126,9 @@ int main(int argc, char** argv) {
   numblocks = length / MEMBLOCKSIZE;
   lseek(fd, 0, SEEK_SET);
   mfd = mmap(NULL, length, PROT_READ, MAP_SHARED, fd, 0);
+  for (i = 0; i < numblocks; i ++) {
+    memcpy(&tmp, mfd + i, MEMBLOCKSIZE);
+  }
   pthread_mutex_init(&filelock, NULL);
   for(i = 0; i < numworkers; i ++) {
     pthread_create(&tid[i], NULL, dowork, NULL);
