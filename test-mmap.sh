@@ -1,7 +1,7 @@
 #!/bin/bash
 for bg in 0 1 2 4 8 16 32; do
     if [ ! -f random-$bg.img ]; then
-        sudo dd if=/dev/urandom of=random-$bg.img bs=1M count=1024
+        dd if=/dev/urandom of=random-$bg.img bs=1M count=1024
     fi
 done
 
