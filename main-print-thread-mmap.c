@@ -16,7 +16,7 @@ typedef struct BigMEMBlock {
 
 int numblocks;
 int numworkers = 1;
-int runtime = 600;
+int runtime = 60;
 int prepare = 5;
 
 size_t MEMBLOCKSIZE = sizeof(BigMEMBlock);
@@ -130,6 +130,11 @@ int main(int argc, char** argv) {
     perror("Failed to mmap\n");
     return -1;
   }
+  if (madvise(mfd, length, MADV_RANDOM)) {
+    perror("madvise");
+    return -1;
+  }
+  close(fd);
   for (i = 0; i < numblocks; i ++) {
     memcpy(&tmp, mfd + i, MEMBLOCKSIZE);
   }
@@ -145,7 +150,7 @@ int main(int argc, char** argv) {
   }
   pthread_mutex_destroy(&filelock);
   munmap(mfd, length);
-  close(fd);
+
   if (!background) {
     fclose(logfd);
   }
