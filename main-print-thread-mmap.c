@@ -126,6 +126,10 @@ int main(int argc, char** argv) {
   numblocks = length / MEMBLOCKSIZE;
   lseek(fd, 0, SEEK_SET);
   mfd = mmap(NULL, length, PROT_READ, MAP_SHARED, fd, 0);
+  if (mfd == MAP_FAILED) {
+    perror("Failed to mmap\n");
+    return -1;
+  }
   for (i = 0; i < numblocks; i ++) {
     memcpy(&tmp, mfd + i, MEMBLOCKSIZE);
   }
