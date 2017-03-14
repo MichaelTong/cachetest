@@ -14,9 +14,9 @@ typedef struct BigMEMBlock {
   unsigned char onebyte[128];
 } BigMEMBlock;
 
-int numblocks;
+unsigned long long numblocks;
 int numworkers = 1;
-int runtime = 60;
+int runtime = 30;
 int prepare = 5;
 
 size_t MEMBLOCKSIZE = sizeof(BigMEMBlock);
@@ -34,12 +34,18 @@ long readmmap() {
   int idx = rand() % numblocks;
   struct timespec begin, end;
   long timediff;
-  BigMEMBlock *source = ((BigMEMBlock* )mfd) + idx;
-  BigMEMBlock tmp;
-
+  char *source = mfd;
+  char tmp;
+  int ret;
+  //BigMEMBlock *source = ((BigMEMBlock* )mfd) + idx;
+  //BigMEMBlock tmp;
+  ret = syscall(324, source + idx);
   clock_gettime(CLOCK_MONOTONIC, &begin);
-  memcpy(&tmp, source, sizeof(MEMBLOCKSIZE));
+  tmp = source[idx];
+//  tmp = *source;
+  //memcpy(&tmp, source, sizeof(MEMBLOCKSIZE));
   clock_gettime(CLOCK_MONOTONIC, &end);
+  printf("ret: %d\n", ret);
   timediff = (end.tv_sec - begin.tv_sec) * 1000000000 + (end.tv_nsec - begin.tv_nsec);
   return timediff;
 }
@@ -101,7 +107,7 @@ void *timerend() {
 
 int main(int argc, char** argv) {
   int i;
-  int filenum = 0;
+  char *filenum;
   char filename[100];
   unsigned long long length;
   BigMEMBlock tmp;
@@ -109,35 +115,36 @@ int main(int argc, char** argv) {
 
   tid = malloc(numworkers * sizeof(pthread_t));
   printf("Main Pid: %ld\n", syscall(SYS_gettid));
-
+  sleep(10);
   if (argc > 1) {
-    filenum = atoi(argv[1]);
-    if (filenum > 0) {
+    filenum = argv[1];
+    if (argc > 2) { 
       background = 1;
       runtime += 5;
     }
   }
-  sprintf(filename, "random-%d.img", filenum);
+  sprintf(filename, "random-%s.img", filenum);
   if (!background) {
     logfd = fopen("memaccess.log", "w");
   }
   fd = open(filename, O_NOATIME | O_RDONLY);
   length = lseek(fd, 0, SEEK_END);
-  numblocks = length / MEMBLOCKSIZE;
+  printf("length %lld\n", length);
+  numblocks = length / sizeof(char);
   lseek(fd, 0, SEEK_SET);
   mfd = mmap(NULL, length, PROT_READ, MAP_SHARED, fd, 0);
   if (mfd == MAP_FAILED) {
     perror("Failed to mmap\n");
     return -1;
   }
-  if (madvise(mfd, length, MADV_RANDOM)) {
+  if (0 && madvise(mfd, length, MADV_SEQUENTIAL)) {
     perror("madvise");
     return -1;
   }
   close(fd);
-  for (i = 0; i < numblocks; i ++) {
-    memcpy(&tmp, mfd + i, MEMBLOCKSIZE);
-  }
+  //for (i = 0; i < numblocks; i ++) {
+  //  memcpy(&tmp, mfd + i, MEMBLOCKSIZE);
+  //}
   pthread_mutex_init(&filelock, NULL);
   for(i = 0; i < numworkers; i ++) {
     pthread_create(&tid[i], NULL, dowork, NULL);

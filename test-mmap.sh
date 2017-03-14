@@ -1,19 +1,20 @@
 #!/bin/bash
-for bg in 0 1 2 4 8 16 32; do
+for bg in $(seq 32); do
     if [ ! -f random-$bg.img ]; then
         dd if=/dev/urandom of=random-$bg.img bs=1M count=1024
     fi
 done
 
-for bg in 0 1 2 4 8 16 32; do
+echo 3 | sudo tee /proc/sys/vm/drop_caches
+for bg in 4; do
   echo $bg
   for i in $(seq $bg); do
     j=$(($i-1))
-    ./cachetest 1 &
+    ./cachetest-mmap $i &
     pids[$j]=$!
   done
-  sleep 15
-  perf stat -e faults ./cachetest &
+  sleep 2
+  /usr/bin/time -v ./cachetest-mmap 0 &
   wait $!
   for i in $(seq $bg); do
     j=$(($i-1))
