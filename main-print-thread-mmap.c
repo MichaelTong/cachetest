@@ -130,7 +130,7 @@ int main(int argc, char** argv) {
   fd = open(filename, O_NOATIME | O_RDONLY);
   length = lseek(fd, 0, SEEK_END);
   printf("length %lld\n", length);
-  numblocks = length / sizeof(char);
+  numblocks = length / sizeof(MEMBLOCKSIZE);
   lseek(fd, 0, SEEK_SET);
   mfd = mmap(NULL, length, PROT_READ, MAP_SHARED, fd, 0);
   if (mfd == MAP_FAILED) {
