@@ -45,7 +45,7 @@ long readmmap() {
 //  tmp = *source;
   //memcpy(&tmp, source, sizeof(MEMBLOCKSIZE));
   clock_gettime(CLOCK_MONOTONIC, &end);
-  printf("ret: %d\n", ret);
+  //printf("ret: %d\n", ret);
   timediff = (end.tv_sec - begin.tv_sec) * 1000000000 + (end.tv_nsec - begin.tv_nsec);
   return timediff;
 }
@@ -118,7 +118,7 @@ int main(int argc, char** argv) {
   sleep(10);
   if (argc > 1) {
     filenum = argv[1];
-    if (argc > 2) { 
+    if (argc > 2) {
       background = 1;
       runtime += 5;
     }
