@@ -5,23 +5,23 @@ for bg in $(seq 32); do
     fi
 done
 
-echo 3 | sudo tee /proc/sys/vm/drop_caches
 for bg in 4; do
-  echo $bg
-  for i in $(seq $bg); do
-    j=$(($i-1))
-    ./cachetest-mmap $i &
-    pids[$j]=$!
-  done
-  sleep 2
-  /usr/bin/time -v ./cachetest-mmap 0 &
-  wait $!
-  for i in $(seq $bg); do
-    j=$(($i-1))
-    echo "kill background: ${pids[$j]}"
-    kill -9 ${pids[$j]}
-  done
-  mv outputs/memaccess.log outputs/memaccess.bg.${bg}.log
-  sleep 5
+    echo $bg
+    echo 3 | sudo tee /proc/sys/vm/drop_caches
+    for i in $(seq $bg); do
+        j=$(($i-1))
+        ./cachetest-mmap $i &
+        pids[$j]=$!
+    done
+    sleep 2
+    /usr/bin/time -v ./cachetest-mmap 0 &
+    wait $!
+    for i in $(seq $bg); do
+        j=$(($i-1))
+        echo "kill background: ${pids[$j]}"
+        kill -9 ${pids[$j]}
+    done
+    mv outputs/memaccess.log outputs/memaccess.bg.${bg}.log
+    sleep 5
 done
 
