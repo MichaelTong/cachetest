@@ -1,7 +1,7 @@
 #!/bin/bash
 for bg in $(seq 32); do
-    if [ ! -f random-$bg.img ]; then
-        dd if=/dev/urandom of=random-$bg.img bs=1M count=1024
+    if [ ! -f imgs/random-$bg.img ]; then
+        dd if=/dev/urandom of=imgs/random-$bg.img bs=1M count=1024
     fi
 done
 
@@ -21,7 +21,7 @@ for bg in 4; do
     echo "kill background: ${pids[$j]}"
     kill -9 ${pids[$j]}
   done
-  mv memaccess.log memaccess.bg.${bg}.log
+  mv outputs/memaccess.log outputs/memaccess.bg.${bg}.log
   sleep 5
 done
 

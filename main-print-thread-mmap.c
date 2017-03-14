@@ -34,19 +34,20 @@ long readmmap() {
   int idx = rand() % numblocks;
   struct timespec begin, end;
   long timediff;
-  char *source = mfd;
-  char tmp;
+  //char *source = mfd;
+  //char tmp;
   int ret;
-  //BigMEMBlock *source = ((BigMEMBlock* )mfd) + idx;
-  //BigMEMBlock tmp;
+  BigMEMBlock *source = ((BigMEMBlock* )mfd) + idx;
+  BigMEMBlock tmp;
   ret = syscall(324, source + idx);
   clock_gettime(CLOCK_MONOTONIC, &begin);
   tmp = source[idx];
-//  tmp = *source;
-  //memcpy(&tmp, source, sizeof(MEMBLOCKSIZE));
+  memcpy(&tmp, source, sizeof(MEMBLOCKSIZE));
   clock_gettime(CLOCK_MONOTONIC, &end);
-  //printf("ret: %d\n", ret);
   timediff = (end.tv_sec - begin.tv_sec) * 1000000000 + (end.tv_nsec - begin.tv_nsec);
+  if (ret < 1) {
+    timediff = -1000000;
+  }
   return timediff;
 }
 
@@ -110,7 +111,6 @@ int main(int argc, char** argv) {
   char *filenum;
   char filename[100];
   unsigned long long length;
-  BigMEMBlock tmp;
   srand((unsigned) time(NULL));
 
   tid = malloc(numworkers * sizeof(pthread_t));
@@ -123,9 +123,9 @@ int main(int argc, char** argv) {
       runtime += 5;
     }
   }
-  sprintf(filename, "random-%s.img", filenum);
+  sprintf(filename, "imgs/random-%s.img", filenum);
   if (!background) {
-    logfd = fopen("memaccess.log", "w");
+    logfd = fopen("outputs/memaccess.log", "w");
   }
   fd = open(filename, O_NOATIME | O_RDONLY);
   length = lseek(fd, 0, SEEK_END);
