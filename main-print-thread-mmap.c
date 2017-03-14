@@ -39,10 +39,9 @@ long readmmap() {
   int ret;
   BigMEMBlock *source = ((BigMEMBlock* )mfd) + idx;
   BigMEMBlock tmp;
-  ret = syscall(324, source + idx);
+  ret = syscall(324, source);
   clock_gettime(CLOCK_MONOTONIC, &begin);
-  tmp = source[idx];
-  memcpy(&tmp, source, sizeof(MEMBLOCKSIZE));
+  memcpy(&tmp, source, MEMBLOCKSIZE);
   clock_gettime(CLOCK_MONOTONIC, &end);
   timediff = (end.tv_sec - begin.tv_sec) * 1000000000 + (end.tv_nsec - begin.tv_nsec);
   if (ret < 1) {
@@ -130,7 +129,7 @@ int main(int argc, char** argv) {
   fd = open(filename, O_NOATIME | O_RDONLY);
   length = lseek(fd, 0, SEEK_END);
   printf("length %lld\n", length);
-  numblocks = length / sizeof(MEMBLOCKSIZE);
+  numblocks = length / MEMBLOCKSIZE;
   lseek(fd, 0, SEEK_SET);
   mfd = mmap(NULL, length, PROT_READ, MAP_SHARED, fd, 0);
   if (mfd == MAP_FAILED) {
@@ -142,9 +141,6 @@ int main(int argc, char** argv) {
     return -1;
   }
   close(fd);
-  //for (i = 0; i < numblocks; i ++) {
-  //  memcpy(&tmp, mfd + i, MEMBLOCKSIZE);
-  //}
   pthread_mutex_init(&filelock, NULL);
   for(i = 0; i < numworkers; i ++) {
     pthread_create(&tid[i], NULL, dowork, NULL);
