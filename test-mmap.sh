@@ -5,7 +5,7 @@ for bg in $(seq 32); do
     fi
 done
 
-for bg in 4; do
+for bg in 0 1 2 4 8 16 32; do
     echo $bg
     echo 3 | sudo tee /proc/sys/vm/drop_caches
     for i in $(seq $bg); do
@@ -19,7 +19,7 @@ for bg in 4; do
     for i in $(seq $bg); do
         j=$(($i-1))
         echo "kill background: ${pids[$j]}"
-        kill -9 ${pids[$j]}
+        sudo kill -9 ${pids[$j]}
     done
     mv outputs/memaccess.log outputs/memaccess.bg.${bg}.log
     sleep 5

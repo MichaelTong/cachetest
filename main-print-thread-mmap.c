@@ -11,11 +11,11 @@
 #include <fcntl.h>
 
 typedef struct BigMEMBlock {
-  unsigned char onebyte[128];
+  unsigned char onebyte[10240];
 } BigMEMBlock;
 
 unsigned long long numblocks;
-int numworkers = 1;
+int numworkers = 4;
 int runtime = 30;
 int prepare = 5;
 
@@ -39,7 +39,7 @@ long readmmap() {
   int ret;
   BigMEMBlock *source = ((BigMEMBlock* )mfd) + idx;
   BigMEMBlock tmp;
-  ret = syscall(324, source);
+  //ret = syscall(324, source);
   clock_gettime(CLOCK_MONOTONIC, &begin);
   memcpy(&tmp, source, MEMBLOCKSIZE);
   clock_gettime(CLOCK_MONOTONIC, &end);
