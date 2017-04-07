@@ -14,13 +14,13 @@ typedef struct BigMEMBlock {
   unsigned char onebyte[4096];
 } BigMEMBlock;
 
-unsigned long long numblocks;
-int numworkers = 8;
+unsigned long long numblocks = (51ULL * 1024) * 1024 * 1024 / sizeof(BigMEMBlock);
+int numworkers = 1;
 int runtime = 30;
 int prepare = 5;
 
 size_t MEMBLOCKSIZE = sizeof(BigMEMBlock);
-void* mfd;
+BigMEMBlock* mfd;
 pthread_t *tid;
 pthread_mutex_t filelock;
 FILE* logfd;
@@ -36,6 +36,8 @@ long readmmap() {
   long timediff;
   //char *source = mfd;
   //char tmp;
+  sleep(1);
+  return 0;
   int ret;
   BigMEMBlock *source = ((BigMEMBlock* )mfd) + idx;
   BigMEMBlock tmp;
@@ -122,25 +124,16 @@ int main(int argc, char** argv) {
       runtime += 5;
     }
   }
-  sprintf(filename, "imgs/random-%s.img", filenum);
+  mfd = (BigMEMBlock *)malloc(numblocks*sizeof(BigMEMBlock));  
+
+  srand((unsigned) time(NULL)); 
+  for (i = 0; i < numblocks; i ++) {
+    memset(&mfd[i], rand()%256, sizeof(BigMEMBlock));
+  } 
   if (!background) {
     logfd = fopen("outputs/memaccess.log", "w");
   }
-  fd = open(filename, O_NOATIME | O_RDONLY);
-  length = lseek(fd, 0, SEEK_END);
-  printf("length %lld\n", length);
-  numblocks = length / MEMBLOCKSIZE;
-  lseek(fd, 0, SEEK_SET);
-  mfd = mmap(NULL, length, PROT_READ, MAP_SHARED, fd, 0);
-  if (mfd == MAP_FAILED) {
-    perror("Failed to mmap\n");
-    return -1;
-  }
-  if (0 && madvise(mfd, length, MADV_SEQUENTIAL)) {
-    perror("madvise");
-    return -1;
-  }
-  close(fd);
+
   pthread_mutex_init(&filelock, NULL);
   for(i = 0; i < numworkers; i ++) {
     pthread_create(&tid[i], NULL, dowork, NULL);
@@ -152,7 +145,6 @@ int main(int argc, char** argv) {
     pthread_join(tid[i], NULL);
   }
   pthread_mutex_destroy(&filelock);
-  munmap(mfd, length);
 
   if (!background) {
     fclose(logfd);
