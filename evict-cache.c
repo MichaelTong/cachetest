@@ -27,7 +27,7 @@ int main(int argc, char** argv) {
   fd = open(filename, O_NOATIME | O_RDONLY);
   length = lseek(fd, 0, SEEK_END);
   numpages = length/PAGESIZE;
-  //  printf("length %lld\n", length);
+  printf("length %llu, numpages %llu, percentage %.2f%%\n", length, numpages, percentage);
   lseek(fd, 0, SEEK_SET);
   mfd = mmap(NULL, length, PROT_READ, MAP_SHARED, fd, 0);
 
