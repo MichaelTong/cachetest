@@ -50,8 +50,8 @@ int main(int argc, char** argv) {
   lseek(fd, 0, SEEK_SET);
   mfd = mmap(NULL, length, PROT_READ, MAP_SHARED, fd, 0);
   for (i = 0; i < numpages; i++) {
-    int rn = rand() % 10000;
-    if (rn < 100 * new_percentage && !(min_array[i] & 0x1)) {
+    int rn = rand() % 10000000;
+    if (rn < 100000 * new_percentage && !(min_array[i] & 0x1)) {
       posix_fadvise(fd, i*PAGESIZE, PAGESIZE, POSIX_FADV_DONTNEED);
     }
   }
