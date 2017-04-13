@@ -37,6 +37,9 @@ int main(int argc, char** argv) {
     if (min_array[i] & 0x1)
       inmem++;
   }
+  if (inmem == numpages) {
+    return 0;
+  }
   new_percentage = numpages*percentage/(numpages - inmem);
   printf("length %llu, numpages %llu, inmem %llu, percentage %.2f%%, new_percentage %.2f%%\n", length, numpages, inmem, percentage, new_percentage);
 
