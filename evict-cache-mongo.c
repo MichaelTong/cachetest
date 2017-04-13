@@ -42,7 +42,20 @@ int main(int argc, char** argv) {
   }
   new_percentage = numpages*percentage/(numpages - inmem);
   printf("length %llu, numpages %llu, inmem %llu, percentage %.2f%%, new_percentage %.2f%%\n", length, numpages, inmem, percentage, new_percentage);
+  for (i = 0; i < numpages; i++) {
+    junk_counter += ((char*)mfd)[i*PAGESIZE];
+  }
+  munmap(mfd, length);
 
+  lseek(fd, 0, SEEK_SET);
+  mfd = mmap(NULL, length, PROT_READ, MAP_SHARED, fd, 0);
+  for (i = 0; i < numpages; i++) {
+    int rn = rand() % 10000;
+    if (rn < 100 * new_percentage && !(min_array[i] & 0x1)) {
+      posix_fadvise(fd, i*PAGESIZE, PAGESIZE, POSIX_FADV_DONTNEED);
+    }
+  }
+  /*
   for (i = 0; i < numpages; i++) {
     if (!(min_array[i] & 0x1)) {
       int rn = rand() %10000000;
@@ -50,7 +63,7 @@ int main(int argc, char** argv) {
         junk_counter += ((char*)mfd)[i*PAGESIZE];
       }
     }
-  }
+    }*/
   /*
   for (i = 0; i < numpages; i++) {
     junk_counter += ((char*)mfd)[i*PAGESIZE];
