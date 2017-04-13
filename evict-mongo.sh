@@ -9,3 +9,5 @@ echo ""
 for f in /home/sdb_mount/data/ycsb.*; do
   ./evict-cache-mongo $f $percentage
 done
+
+vmtouch -v /home/sdb_mount/data/ycsb.*
