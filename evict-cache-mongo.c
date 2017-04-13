@@ -32,13 +32,23 @@ int main(int argc, char** argv) {
   lseek(fd, 0, SEEK_SET);
   mfd = mmap(NULL, length, PROT_READ, MAP_SHARED, fd, 0);
   min_array = malloc(numpages);
-  mincore(mfd, numpages, min_array);
+  mincore(mfd, length, min_array);
   for (i = 0; i < numpages; i++) {
     if (min_array[i] & 0x1)
       inmem++;
   }
   new_percentage = numpages*percentage/(numpages - inmem);
-  printf("length %llu, numpages %llu, percentage %.2f%%, new_percentage %.2f%%\n", length, numpages, percentage, new_percentage);
+  printf("length %llu, numpages %llu, inmem %llu, percentage %.2f%%, new_percentage %.2f%%\n", length, numpages, inmem, percentage, new_percentage);
+
+  for (i = 0; i < numpages; i++) {
+    if (!(min_array[i] & 0x1)) {
+      int rn = rand() %10000;
+      if (rn > 100 * percentage) {
+        junk_counter += ((char*)mfd)[i*PAGESIZE];
+      }
+    }
+  }
+  /*
   for (i = 0; i < numpages; i++) {
     junk_counter += ((char*)mfd)[i*PAGESIZE];
   }
@@ -47,7 +57,7 @@ int main(int argc, char** argv) {
     if (rn < 100 * new_percentage && !(min_array[i] & 0x1)) {
       posix_fadvise(fd, i*PAGESIZE, PAGESIZE, POSIX_FADV_DONTNEED);
     }
-  }
+    }*/
   /*  if (posix_fadvise(fd, length/4, length/2, POSIX_FADV_DONTNEED))
     printf("unable to posix_fadvise file %s (%s)", "xxx", strerror(errno));
   if(msync(evict_start, pages/2*4096, MS_INVALIDATE)) {
