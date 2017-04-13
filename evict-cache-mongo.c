@@ -45,8 +45,8 @@ int main(int argc, char** argv) {
 
   for (i = 0; i < numpages; i++) {
     if (!(min_array[i] & 0x1)) {
-      int rn = rand() %10000;
-      if (rn > 100 * percentage) {
+      int rn = rand() %10000000;
+      if (rn > 100000 * new_percentage) {
         junk_counter += ((char*)mfd)[i*PAGESIZE];
       }
     }
